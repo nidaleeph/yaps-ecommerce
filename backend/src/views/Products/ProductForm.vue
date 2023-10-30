@@ -77,7 +77,7 @@ const product = ref({
   product_code: null,
 });
 
-const lastId = ref(null);
+const getItemCount = ref(null);
 const errors = ref({});
 const loading = ref(false);
 const options = ref([]);
@@ -97,14 +97,14 @@ onMounted(() => {
       .then((response) => {
         loading.value = false;
         product.value = response.data;
-        lastId.value = response.data.id -1;
+        getItemCount.value = response.data.id -1;
         categoryId.value = response.data.categories
       });
   }
   else{
-    axiosClient.get('getLastId')
+    axiosClient.get('getItemCount')
     .then(result => {
-      lastId.value = result.data;
+      getItemCount.value = result.data;
     });
   }
 });
@@ -144,10 +144,8 @@ async function updateProductPrice() {
 // Watch categoryId for changes and update product.price accordingly
 watch(categoryId, () => {
   product.value.categories = categoryId
-  console.log(categoryId)
-  // console.log(options.value)
   const matchingObject = options.value.find(categories => categories.id === categoryId.value);
-  const formattedString = (matchingObject.label.split(' ').length === 1 ? matchingObject.label.substring(0, 2) : matchingObject.label.split(' ').map(word => word[0]).slice(0, 2).join('')).toLowerCase() + `-${String(lastId.value+1 ).padStart(4, '0')}`;
+  const formattedString = (matchingObject.label.split(' ').length === 1 ? matchingObject.label.substring(0, 2) : matchingObject.label.split(' ').map(word => word[0]).slice(0, 2).join('')).toLowerCase() + `-${String(getItemCount.value+1 ).padStart(4, '0')}`;
   product.value.product_code = formattedString;
   updateProductPrice();
 });

@@ -198,8 +198,8 @@ class ProductController extends Controller
         }
     }
 
-    public function getLastId()
+    public function getItemCount()
     {
-        return Product::orderBy('id','desc')->first()->id;
+        return Product::withTrashed()->count();
     }
 }
