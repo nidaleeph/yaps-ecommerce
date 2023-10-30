@@ -234,7 +234,7 @@ class CheckoutController extends Controller
             // Create Order
             $orderData = [
                 'total_price' => $totalPrice,
-                'status' => OrderStatus::Paid,
+                'status' => $request->isPaid ? OrderStatus::Paid : OrderStatus::Unpaid,
                 'created_by' => $user->id,
                 'updated_by' => $user->id,
             ];
@@ -250,7 +250,7 @@ class CheckoutController extends Controller
             $paymentData = [
                 'order_id' => $order->id,
                 'amount' => $totalPrice,
-                'status' => PaymentStatus::Paid,
+                'status' => $request->isPaid ? OrderStatus::Paid : OrderStatus::Unpaid,
                 'type' => 'cc',
                 'created_by' => $user->id,
                 'updated_by' => $user->id,

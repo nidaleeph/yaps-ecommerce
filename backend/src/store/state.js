@@ -47,7 +47,8 @@ export default {
   toast: {
     show: false,
     message: '',
-    delay: 5000
+    delay: 5000,
+    color: 'bg-emerald-500'
   },
   dateOptions: [
     {key: '1d', text: 'Last Day'},

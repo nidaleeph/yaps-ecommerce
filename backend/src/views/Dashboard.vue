@@ -11,7 +11,7 @@
       <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" @click="downloadCsv">Download</button>
     </div>
   </div>
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
     <!--    Active Customers-->
     <div class="animate-fade-in-down bg-white py-6 px-5 rounded-lg shadow flex flex-col items-center justify-center">
       <label class="text-lg font-semibold block mb-2">Active Customers</label>
@@ -44,9 +44,17 @@
     <!--    Total Income -->
     <div class="animate-fade-in-down bg-white py-6 px-5 rounded-lg shadow flex flex-col items-center"
          style="animation-delay: 0.3s">
-      <label class="text-lg font-semibold block mb-2">Total Income</label>
+      <label class="text-lg font-semibold block mb-2">Date Income</label>
       <template v-if="!loading.totalIncome">
         <span class="text-3xl font-semibold">{{ totalIncome }}</span>
+      </template>
+      <Spinner v-else text="" class=""/>
+    </div>
+    <div class="animate-fade-in-down bg-white py-6 px-5 rounded-lg shadow flex flex-col items-center"
+         style="animation-delay: 0.3s">
+      <label class="text-lg font-semibold block mb-2">All Products Total Price</label>
+      <template v-if="!loading.allPrice">
+        <span class="text-3xl font-semibold">{{ allPrice }}</span>
       </template>
       <Spinner v-else text="" class=""/>
     </div>
@@ -129,6 +137,7 @@ const totalIncome = ref(0);
 const ordersByCountry = ref([]);
 const latestCustomers = ref([]);
 const latestOrders = ref([]);
+const allPrice = ref(0);
 
 function updateDashboard() {
   
@@ -141,11 +150,22 @@ function updateDashboard() {
     totalIncome: true,
     ordersByCountry: true,
     latestCustomers: true,
-    latestOrders: true
+    latestOrders: true,
+    allPrice: true
   }
   axiosClient.get(`/dashboard/customers-count`, {params: {d,date}}).then(({data}) => {
     customersCount.value = data
     loading.value.customersCount = false;
+  })
+
+  axiosClient.post(`/dashboard/all-items-price`).then(({data}) => {
+    allPrice.value = new Intl.NumberFormat('en-PH', {
+      style: 'currency',
+      currency: 'PHP',
+      minimumFractionDigits: 2
+    })
+      .format(data);
+    loading.value.allPrice = false;
   })
   axiosClient.get(`/dashboard/products-count`, {params: {d,date}}).then(({data}) => {
     productsCount.value = data;
@@ -159,7 +179,7 @@ function updateDashboard() {
     totalIncome.value = new Intl.NumberFormat('en-PH', {
       style: 'currency',
       currency: 'PHP',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 2
     })
       .format(data);
     loading.value.totalIncome = false;

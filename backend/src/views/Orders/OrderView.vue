@@ -155,13 +155,27 @@ function onStatusChange() {
 
   const confirmYesButton = document.getElementById('confirm-yes');
   const confirmNoButton = document.getElementById('confirm-no');
-
+  console.log(this_order.value,'test')
+  console.log(order.value,'test2')
   confirmYesButton.onclick = function () {
     modal.style.display = 'none';
     axiosClient.post(`/orders/change-status/${order.value.id}/${order.value.status}`)
       .then(({ data }) => {
-        store.commit('showToast', `Order status was successfully changed into "${order.value.status}"`);
-      });
+        if(data){
+          if(data.failed){
+            store.commit('showToast', {message: data.message, color: 'bg-red-500'});
+            order.value.status = this_order.value
+          }
+        }else{
+          store.commit('showToast', `Order status was successfully changed into "${order.value.status}"`);
+          store.dispatch('getOrder', route.params.id)
+          .then(({data}) => {
+            order.value = data
+            this_order.value = data.status
+          })
+          // order.value.status = this_order.value
+        }
+      })
   };
 
   confirmNoButton.onclick = function () {

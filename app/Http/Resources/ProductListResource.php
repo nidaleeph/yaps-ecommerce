@@ -16,6 +16,10 @@ class ProductListResource extends JsonResource
      */
     public function toArray($request)
     {
+
+        // Get the first category doesnt use tree
+        $category = $this->categories->first(); 
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -24,6 +28,7 @@ class ProductListResource extends JsonResource
             'price' => $this->price,
             'quantity' => $this->quantity,
             'updated_at' => ( new \DateTime($this->updated_at) )->format('Y-m-d H:i:s'),
+            'categories' => $category ? $category->name : null, // Include the 'categories' relationship
         ];
     }
 }

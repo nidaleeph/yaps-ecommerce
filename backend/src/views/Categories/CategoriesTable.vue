@@ -2,7 +2,21 @@
   <div class="bg-white p-4 rounded-lg shadow animate-fade-in-down">
     <div class="flex justify-between border-b-2 pb-3">
       <div class="flex items-center">
-        <span class="ml-3">Found {{categories.data.length}} categories</span>
+        <span class="whitespace-nowrap mr-3">Per Page</span>
+        <select @change="getCategories(null)" v-model="perPage"
+                class="appearance-none relative block w-24 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <span class="ml-3">Found {{ categories.total }} categories</span>
+      </div>
+      <div>
+        <input v-model="search" @change="getCategories(null)"
+               class="appearance-none relative block w-48 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+               placeholder="Type to Search categories">
       </div>
     </div>
 
@@ -144,6 +158,37 @@
       </tr>
       </tbody>
     </table>
+    <div v-if="!categories.loading" class="flex justify-between items-center mt-5">
+      <div v-if="categories.data.length">
+        Showing from {{ categories.from }} to {{ categories.to }}
+      </div>
+      <nav
+        v-if="categories.total > categories.limit"
+        class="relative z-0 inline-flex justify-center rounded-md shadow-sm -space-x-px"
+        aria-label="Pagination"
+      >
+        <!-- Current: "z-10 bg-indigo-50 border-indigo-500 text-indigo-600", Default: "bg-white border-gray-300 text-gray-500 hover:bg-gray-50" -->
+        <a
+          v-for="(link, i) of categories.links"
+          :key="i"
+          :disabled="!link.url"
+          href="#"
+          @click="getForPage($event, link)"
+          aria-current="page"
+          class="relative inline-flex items-center px-4 py-2 border text-sm font-medium whitespace-nowrap"
+          :class="[
+              link.active
+                ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
+              i === 0 ? 'rounded-l-md' : '',
+              i === categories.links.length - 1 ? 'rounded-r-md' : '',
+              !link.url ? ' bg-gray-100 text-gray-700': ''
+            ]"
+          v-html="link.label"
+        >
+        </a>
+      </nav>
+    </div>
   </div>
 </template>
 
@@ -156,11 +201,16 @@ import {Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
 import {DotsVerticalIcon, PencilIcon, TrashIcon} from '@heroicons/vue/outline'
 import CategoryModal from "./CategoryModal.vue";
 import moment from 'moment';
+import {CATEGORIES_PER_PAGE} from "../../constants";
+
 
 
 const categories = computed(() => store.state.categories);
 const sortField = ref('name');
 const sortDirection = ref('asc')
+const perPage = ref(CATEGORIES_PER_PAGE);
+const search = ref('');
+
 
 const category = ref({})
 const showCategoryModal = ref(false);
@@ -183,6 +233,8 @@ function getForPage(ev, link) {
 function getCategories(url = null) {
   store.dispatch("getCategories", {
     url,
+    search: search.value,
+    per_page: perPage.value,
     sort_field: sortField.value,
     sort_direction: sortDirection.value
   });

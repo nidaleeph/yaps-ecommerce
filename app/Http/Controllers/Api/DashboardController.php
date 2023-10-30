@@ -226,4 +226,10 @@ class DashboardController extends Controller
 
         return 'Date-' .'from='.$request->startDate.'to='.$request->endDate .'-'.time() . '.csv';
     }
+
+    public function allItemPrice(){
+        return Product::where('published', true)->get()->sum(function ($product) {
+            return $product->price * $product->quantity;
+        });
+    }
 }

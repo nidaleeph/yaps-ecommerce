@@ -28,7 +28,7 @@ class ProductController extends Controller
         $search = request('search', '');
         $sortField = request('sort_field', 'created_at');
         $sortDirection = request('sort_direction', 'desc');
-
+        
         $query = Product::query()
             ->where(function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%")
@@ -36,6 +36,10 @@ class ProductController extends Controller
                     ->orWhere('price', 'like', "%{$search}%")
                     ->orWhere('quantity', 'like', "%{$search}%");
             })
+            ->orWhereHas('categories', function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->with('categories') // Eager load the categories relationship
             ->orderBy($sortField, $sortDirection)
             ->paginate($perPage);
 
@@ -192,5 +196,10 @@ class ProductController extends Controller
             }
             $image->delete();
         }
+    }
+
+    public function getLastId()
+    {
+        return Product::orderBy('id','desc')->first()->id;
     }
 }

@@ -12,16 +12,13 @@
       <div class="grid grid-cols-3">
         <div class="col-span-2 px-4 pt-5 pb-4">
           <CustomInput class="mb-2" v-model="product.title" label="Product Title" :errors="errors['title']" required/>
-          <CustomInput class="mb-2" v-model="product.product_code" label="Product Code" :errors="errors['product_code']" required/>
+          <treeselect v-model="categoryId" :options="options" :errors="errors['categories']" required placeholder="Select categories"/>
+          <div class="error-message">{{ errors['categories'] ? errors['categories'][0] : '' }}</div>
           <CustomInput type="richtext" class="mb-2" v-model="product.description" label="Description" :errors="errors['description']"/>
           <CustomInput type="number" class="mb-2" v-model="product.quantity" label="Quantity" :errors="errors['quantity']" required/>
           <CustomInput type="checkbox" class="mb-2" v-model="product.published" label="Published" :errors="errors['published']"/>
-          <treeselect v-model="categoryId" :options="options" :errors="errors['categories']" required placeholder="Select categories"/>
+          <CustomInput class="mb-2" v-model="product.product_code" label="Product Code" :errors="errors['product_code']" required disabled/>
           <CustomInput type="number" class="mb-2" v-model="product.price" label="Price" prepend="₱" :errors="errors['price']" required :disabled="disablePrice"/>
-
-          <!-- <treeselect-value :value="product.categories" /> -->
-      <!-- Display the error message for 'categories' -->
-        <div class="error-message">{{ errors['categories'] ? errors['categories'][0] : '' }}</div>
         </div>
         <div class="col-span-1 px-4 pt-5 pb-4">
           <image-preview v-model="product.images"
@@ -77,8 +74,10 @@ const product = ref({
   quantity: null,
   published: false,
   categories: null,
+  product_code: null,
 });
 
+const lastId = ref(null);
 const errors = ref({});
 const loading = ref(false);
 const options = ref([]);
@@ -87,20 +86,27 @@ const disablePrice = ref(true);
 const emit = defineEmits(['update:modelValue', 'close']);
 
 onMounted(() => {
+  axiosClient.get('/categories/tree')
+    .then(result => {
+      options.value = result.data;
+    });
+
   if (route.params.id) {
     loading.value = true;
     store.dispatch('getProduct', route.params.id)
       .then((response) => {
         loading.value = false;
         product.value = response.data;
+        lastId.value = response.data.id -1;
         categoryId.value = response.data.categories
       });
   }
-
-  axiosClient.get('/categories/tree')
+  else{
+    axiosClient.get('getLastId')
     .then(result => {
-      options.value = result.data;
+      lastId.value = result.data;
     });
+  }
 });
 
 
@@ -119,10 +125,14 @@ async function updateProductPrice() {
     const result = await findResult();
 
     if (result && result.isSpecial === 0) {
-      product.value.price = result.price;
+      if(!route.params.id){
+        product.value.price = result.price;
+      }
       disablePrice.value = true;
     } else if (result && result.isSpecial === 1) {
-      product.value.price = result.price;
+      if(!route.params.id){
+        product.value.price = result.price;
+      }
       disablePrice.value = false;
     }
   } else {
@@ -134,6 +144,11 @@ async function updateProductPrice() {
 // Watch categoryId for changes and update product.price accordingly
 watch(categoryId, () => {
   product.value.categories = categoryId
+  console.log(categoryId)
+  // console.log(options.value)
+  const matchingObject = options.value.find(categories => categories.id === categoryId.value);
+  const formattedString = (matchingObject.label.split(' ').length === 1 ? matchingObject.label.substring(0, 2) : matchingObject.label.split(' ').map(word => word[0]).slice(0, 2).join('')).toLowerCase() + `-${String(lastId.value+1 ).padStart(4, '0')}`;
+  product.value.product_code = formattedString;
   updateProductPrice();
 });
 

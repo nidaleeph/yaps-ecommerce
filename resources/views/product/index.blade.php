@@ -78,11 +78,13 @@ $categoryList = \App\Models\Category::getActiveAsTree();
                         />
                     </a>
                     <div class="p-4">
-                        <h3 class="text-lg">{{$product->title}}</h3>
+                        <h3 class="text-lg font-bold">{{$product->title}}</h3>
                         <p>
-                            <span class="font-bold">₱{{$product->price}}</span>
+                            <span class="font-bold">Code: </span>
+                            <span>{{$product->product_code}}</span>
                             <span class="font-bold" style="float: right; margin-right: 50px;">Stock: <span class="error-message">{{$product->quantity}}</span></span>
                         </p>
+                        <span class="font-bold">₱{{$product->price}}</span>
                     </div>
                     <div class="flex justify-between py-3 px-4">
                         <button class="btn-primary" @click="addToCart()">

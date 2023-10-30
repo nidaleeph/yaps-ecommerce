@@ -1,7 +1,8 @@
 <template>
   <div
     v-show="toast.show"
-    class="fixed w-[400px] left-1/2 -ml-[200px] top-16 py-2 px-4 pb-4 bg-emerald-500 text-white"
+    class="fixed w-[400px] left-1/2 -ml-[200px] top-16 py-2 px-4 pb-4 text-white"
+    :class="toast.color"
   >
     <div class="font-semibold">{{ toast.message }}</div>
     <button
@@ -42,10 +43,10 @@ let interval = null;
 let timeout = null;
 
 const percent = ref(0)
-
 const toast = computed(() => store.state.toast)
 watch(store.state.toast, (newToast) => {
   if (newToast.show) {
+    console.log('toast',newToast)
 
     if (interval) {
       clearInterval(interval);

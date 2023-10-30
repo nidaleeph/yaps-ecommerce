@@ -18,11 +18,17 @@ class CategoryController extends Controller
     {
         $sortField = request('sort_field', 'updated_at');
         $sortDirection = request('sort_direction', 'desc');
+        $perPage = request('per_page', 10);
+        $search = request('search', '');
 
         $categories = Category::query()
+        ->where(function ($query) use ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('price', 'like', "%{$search}%");
+        })
             ->orderBy($sortField, $sortDirection)
-            ->latest()
-            ->get();
+            // ->latest()
+            ->paginate($perPage);
 
         return CategoryResource::collection($categories);
     }

@@ -61,27 +61,57 @@ class OrderController extends Controller
     {
         DB::beginTransaction();
         try {
+            if ($status === OrderStatus::Cancelled->value && $order->status !== 'returned') {
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    if ($product && $product->quantity !== null) {
+                        $product->quantity += $item->quantity;
+                        $product->save();
+                    }
+                }
+            }
+            else if ($status === OrderStatus::Returned->value && $order->status !== 'cancelled') {
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    if ($product && $product->quantity !== null) {
+                        $product->quantity += $item->quantity;
+                        $product->save();
+                    }
+                }
+            }
+            else if ($status === OrderStatus::Unpaid->value && $order->status !== 'paid') {
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    if ($product && $product->quantity !== null) {
+                        $product->quantity -= $item->quantity;
+                        if($product->quantity < 0){
+                            return response([
+                                'message' => $product->title. ' is out of stock',
+                                'failed' => true
+                            ], 200);
+                        }
+                        $product->save();
+                    }
+                }
+            }
+            else if ($status === OrderStatus::Paid->value && $order->status !== 'unpaid') {
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    if ($product && $product->quantity !== null) {
+                        $product->quantity -= $item->quantity;
+                        if($product->quantity < 0){
+                            return response([
+                                'message' => $product->title. ' is out of stock',
+                                'failed' => true
+                            ], 200);
+                        }
+                        $product->save();
+                    }
+                }
+            }
+
             $order->status = $status;
             $order->save();
-
-            if ($status === OrderStatus::Cancelled->value) {
-                foreach ($order->items as $item) {
-                    $product = $item->product;
-                    if ($product && $product->quantity !== null) {
-                        $product->quantity += $item->quantity;
-                        $product->save();
-                    }
-                }
-            }
-            else if ($status === OrderStatus::Refunded->value) {
-                foreach ($order->items as $item) {
-                    $product = $item->product;
-                    if ($product && $product->quantity !== null) {
-                        $product->quantity += $item->quantity;
-                        $product->save();
-                    }
-                }
-            }
             // Mail::to($order->user)->send(new OrderUpdateEmail($order));
         } catch (\Exception $e) {
             DB::rollBack();

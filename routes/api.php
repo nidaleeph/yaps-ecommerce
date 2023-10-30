@@ -34,6 +34,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('orders/statuses', [OrderController::class, 'getStatuses']);
     Route::post('orders/change-status/{order}/{status}', [OrderController::class, 'changeStatus']);
     Route::get('orders/{order}', [OrderController::class, 'view']);
+    Route::get('/getLastId', [ProductController::class, 'getLastId']);
+
 
     // Dashboard Routes
     Route::get('/dashboard/customers-count', [DashboardController::class, 'activeCustomers']);
@@ -44,6 +46,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/dashboard/latest-customers', [DashboardController::class, 'latestCustomers']);
     Route::get('/dashboard/latest-orders', [DashboardController::class, 'latestOrders']);
     Route::post('/dashboard/csv', [DashboardController::class, 'downloadCsv']);
+    Route::post('/dashboard/all-items-price', [DashboardController::class, 'allItemPrice']);
 
     // Report routes
     Route::get('/report/orders', [ReportController::class, 'orders']);

@@ -86,6 +86,12 @@
             <label for="lastname" class="block text-gray-700 font-semibold">Last Name</label>
             <input type="text" id="lastname" name="lastname" class="w-full border border-gray-300 rounded-md p-2" required>
         </div>
+        <div class="mb-4">
+            <label for="isPaid" class="block text-gray-700 font-semibold">
+                Payment Received
+            </label>
+            <input type="checkbox" id="isPaid" name="isPaid">
+        </div>
         <div class="flex justify-between">
             <span class="font-semibold">Subtotal</span>
             <span id="cartTotal" class="text-xl" x-text="`₱${cartTotal}`"></span>

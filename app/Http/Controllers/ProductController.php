@@ -52,7 +52,8 @@ class ProductController extends Controller
             ->where(function ($query) use ($search) {
                 /** @var $query \Illuminate\Database\Eloquent\Builder */
                 $query->where('products.title', 'like', "%$search%")
-                    ->orWhere('products.description', 'like', "%$search%");
+                    ->orWhere('products.description', 'like', "%$search%")
+                    ->orWhere('products.product_code', 'like', "%$search%");
             })
 
             ->paginate(8);

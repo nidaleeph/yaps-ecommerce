@@ -45,6 +45,10 @@
                          @click="sortProducts('quantity')">
           Quantity
         </TableHeaderCell>
+        <TableHeaderCell field="category" :sort-field="sortField" :sort-direction="sortDirection"
+                         @click="sortProducts('category')">
+          Category
+        </TableHeaderCell>
         <TableHeaderCell field="updated_at" :sort-field="sortField" :sort-direction="sortDirection"
                          @click="sortProducts('updated_at')">
           Last Updated At
@@ -82,6 +86,9 @@
         </td>
         <td class="border-b p-2">
           {{ product.quantity }}
+        </td>
+        <td class="border-b p-2">
+          {{ product.categories }}
         </td>
         <td class="border-b p-2 ">
           {{  moment(product.updated_at).format('MMMM D, YYYY h:mm:ss a')}}
