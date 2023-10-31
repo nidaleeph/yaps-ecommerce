@@ -68,6 +68,16 @@ class DashboardController extends Controller
         return round($query->sum('total_price'));
     }
 
+    public function allTimeTotalIncome()
+    {
+        $productSum = Product::where('published', true)->get()->sum(function ($product) {
+            return $product->price * $product->quantity;
+        });
+
+        $query = Order::query()->whereIn('status', [OrderStatus::Paid->value,OrderStatus::Unpaid->value]);
+        return round($query->sum('total_price')) + $productSum;
+    }
+
     public function ordersByCountry()
     {
         $fromDate = $this->getFromDate();

@@ -52,9 +52,9 @@
     </div>
     <div class="animate-fade-in-down bg-white py-6 px-5 rounded-lg shadow flex flex-col items-center"
          style="animation-delay: 0.3s">
-      <label class="text-lg font-semibold block mb-2">All Products Total Price</label>
+      <label class="text-lg font-semibold block mb-2">Projected Income</label>
       <template v-if="!loading.allPrice">
-        <span class="text-3xl font-semibold">{{ allPrice }}</span>
+        <span class="text-3xl font-semibold">{{ allTimeTotalIncome }}</span>
       </template>
       <Spinner v-else text="" class=""/>
     </div>
@@ -126,6 +126,7 @@ const loading = ref({
   productsCount: true,
   paidOrders: true,
   totalIncome: true,
+  allTimeTotalIncome: false,
   ordersByCountry: true,
   latestCustomers: true,
   latestOrders: true
@@ -134,6 +135,7 @@ const customersCount = ref(0);
 const productsCount = ref(0);
 const paidOrders = ref(0);
 const totalIncome = ref(0);
+const allTimeTotalIncome = ref(0);
 const ordersByCountry = ref([]);
 const latestCustomers = ref([]);
 const latestOrders = ref([]);
@@ -183,6 +185,15 @@ function updateDashboard() {
     })
       .format(data);
     loading.value.totalIncome = false;
+  })
+  axiosClient.get(`/dashboard/alltime-income-amount`, {params: {d}}).then(({data}) => {
+    allTimeTotalIncome.value = new Intl.NumberFormat('en-PH', {
+      style: 'currency',
+      currency: 'PHP',
+      minimumFractionDigits: 2
+    })
+      .format(data);
+    loading.value.allTimeTotalIncome = false;
   })
   axiosClient.get(`/dashboard/orders-by-country`, {params: {d,date}}).then(({data: type}) => {
     loading.value.ordersByCountry = false;
