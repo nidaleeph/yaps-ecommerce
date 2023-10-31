@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\DB;
 use App\Helpers\GlobalHelpers;
 use Illuminate\Http\Response;
 
-
 class DashboardController extends Controller
 {
     use ReportTrait;
@@ -224,7 +223,14 @@ class DashboardController extends Controller
             'path' => '/exports/reports/csv/',
         ]);
 
-        return 'Date-' .'from='.$request->startDate.'to='.$request->endDate .'-'.time() . '.csv';
+        $fileName = 'Date-' .'from='.$request->startDate.'to='.$request->endDate .'-'.time() . '.csv';
+
+        $path = storage_path('app/exports/reports/csv/'.$fileName);
+
+        $response = response()->download($path, $fileName);
+
+        return $response;
+
     }
 
     public function allItemPrice(){

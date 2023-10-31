@@ -10,9 +10,12 @@ use App\Http\Resources\ProductListResource;
 use App\Mail\OrderUpdateEmail;
 use App\Models\Api\Product;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
+
 
 class OrderController extends Controller
 {
@@ -121,5 +124,10 @@ class OrderController extends Controller
         DB::commit();
 
         return response('', 200);
+    }
+    public function printOrder(Request $request, $id){
+        $user = User::where('is_admin',1)->first();
+        $order = Order::with(['items','user','items.product'])->find($id);
+        return view('order.print', compact(['order','user']));
     }
 }

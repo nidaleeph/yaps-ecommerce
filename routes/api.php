@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('orders/change-status/{order}/{status}', [OrderController::class, 'changeStatus']);
     Route::get('orders/{order}', [OrderController::class, 'view']);
     Route::get('/getItemCount', [ProductController::class, 'getItemCount']);
+    Route::post('/dashboard/csv', [DashboardController::class, 'downloadCsv']);
 
 
     // Dashboard Routes
@@ -45,7 +46,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/dashboard/orders-by-country', [DashboardController::class, 'ordersByCountry']);
     Route::get('/dashboard/latest-customers', [DashboardController::class, 'latestCustomers']);
     Route::get('/dashboard/latest-orders', [DashboardController::class, 'latestOrders']);
-    Route::post('/dashboard/csv', [DashboardController::class, 'downloadCsv']);
     Route::post('/dashboard/all-items-price', [DashboardController::class, 'allItemPrice']);
 
     // Report routes
@@ -54,3 +54,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 });
 
 Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+Route::get('/print/order/{id}', [OrderController::class, 'printOrder']);
+
+

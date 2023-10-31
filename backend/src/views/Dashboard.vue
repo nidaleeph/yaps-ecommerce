@@ -238,24 +238,59 @@ function downloadFile(details) {
   }
 }
 
-async function downloadCsv(){
-  const date = chosenDate2.value
+// async function downloadCsv() {
+//   const date = chosenDate2.value;
 
-  const { data } = await axiosClient.post(
-        '/dashboard/csv',date);
-        const csvPath = data; // Assuming response.data contains the CSV path
+//   const { data } = await axiosClient.post('/dashboard/csv', date);
 
-          // Create a full URL for the CSV file on your Laravel backend
-          const csvUrl = `/storage/app/${csvPath}`;
+//   // Create a hidden link for downloading the file
+//   const a = document.createElement('a');
+//   a.href = data; // Set the file URL received from the server
+//   a.download = 'test.csv'; // Set the desired file name
 
-          // Trigger the download
-          const a = document.createElement('a');
-          a.href = csvUrl;
-          a.download = csvPath; // Set the desired file name
-          a.click();
+//   // Trigger a click event to initiate the download
+//   a.style.display = 'none'; // Hide the link
+//   document.body.appendChild(a); // Add the link to the document
+//   a.click(); // Trigger the click event
 
+//   // Clean up after the download
+//   document.body.removeChild(a);
+// }
 
+async function downloadCsv() {
+  const date = chosenDate2.value; // Replace with your date retrieval logic
+  console.log(date)
+  try {
+    // Make an HTTP request to get the download URL from Laravel
+    const response = await axiosClient.post('/dashboard/csv', date, { responseType: 'blob' });
+    
+    // Check if the request was successful
+    if (response.status === 200) {
+      // Create a Blob from the response data
+      const blob = new Blob([response.data], { type: 'application/csv' });
+
+      // Create a URL for the Blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Create an anchor element for downloading
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Reports-from-${date.startDate}-to-${date.endDate}.csv`; // Set the desired file name
+
+      // Trigger a click event on the anchor element to start the download
+      a.click();
+
+      // Clean up by revoking the Object URL to release resources
+      window.URL.revokeObjectURL(url);
+    } else {
+      console.error('Error downloading the CSV file:', response);
+    }
+  } catch (error) {
+    console.error('Error downloading the CSV file:', error);
+  }
 }
+
+
 
 onMounted(() => updateDashboard())
 </script>
