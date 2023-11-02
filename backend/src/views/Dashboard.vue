@@ -119,7 +119,10 @@ import {useStore} from "vuex";
 const store = useStore();
 const dateOptions = computed(() => store.state.dateOptions);
 const chosenDate = ref('all')
-const chosenDate2 = ref({ startDate: new Date().toISOString().split('T')[0], endDate: new Date().toISOString().split('T')[0] });
+const date = new Date();
+const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-01`;
+const startDate = new Date(formattedDate).toISOString().split('T')[0];
+const chosenDate2 = ref({ startDate: startDate, endDate: new Date().toISOString().split('T')[0] });
 
 const loading = ref({
   customersCount: true,
