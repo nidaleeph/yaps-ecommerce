@@ -160,7 +160,9 @@ function onChange(value) {
   emit('change', value)
 }
 
-const startDate = ref(new Date().toISOString().split('T')[0]); // Set to the current date
+const date = new Date();
+const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-01`;
+const startDate = ref(new Date(formattedDate).toISOString().split('T')[0]);
 const endDate = ref(new Date().toISOString().split('T')[0]); // Set to the current date
 
 function onStartDateChange(event) {
