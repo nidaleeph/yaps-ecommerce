@@ -13,6 +13,14 @@
         </select>
         <span class="ml-3">Found {{ products.total }} products</span>
       </div>
+      <div class="flex items-center">
+      <label class="mr-2">Choose Category</label>
+      <CustomInput type="select-category" v-model="chosenCategory" @change="onCategoryChange" :select-options="categories"/>
+      <div>
+        <!-- <VueDatePicker v-model="date"></VueDatePicker> -->
+      </div>
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" @click="downloadCsv">Download CSV</button>
+    </div>
       <div>
         <input v-model="search" @change="getProducts(null)"
                class="appearance-none relative block w-48 px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
@@ -193,7 +201,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import store from "../../store";
 import Spinner from "../../components/core/Spinner.vue";
 import {PRODUCTS_PER_PAGE} from "../../constants";
@@ -201,6 +209,8 @@ import TableHeaderCell from "../../components/core/Table/TableHeaderCell.vue";
 import {Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
 import {DotsVerticalIcon, PencilIcon, TrashIcon} from '@heroicons/vue/outline'
 import moment from 'moment';
+import CustomInput from "../../components/core/CustomInput.vue";
+import axiosClient from "../../axios.js";
 
 
 const perPage = ref(PRODUCTS_PER_PAGE);
@@ -208,12 +218,22 @@ const search = ref('');
 const products = computed(() => store.state.products);
 const sortField = ref('updated_at');
 const sortDirection = ref('desc')
+const categories = ref([])
+const chosenCategory = ref(0)
 
 const product = ref({})
 
 onMounted(() => {
   getProducts();
+  axiosClient.get(`/categories/categoryWithAll`).then(({data}) => {
+    categories.value = data
+  })
 })
+
+function onCategoryChange(){
+  search.value = '';
+  getProducts();
+}
 
 function getForPage(ev, link) {
   ev.preventDefault();
@@ -230,7 +250,8 @@ function getProducts(url = null) {
     search: search.value,
     per_page: perPage.value,
     sort_field: sortField.value,
-    sort_direction: sortDirection.value
+    sort_direction: sortDirection.value,
+    category: chosenCategory.value
   });
 }
 
@@ -258,6 +279,38 @@ function deleteProduct(product) {
       store.commit('showToast', 'Product was successfully deleted');
       store.dispatch('getProducts')
     })
+}
+
+async function downloadCsv() {
+  try {
+    // Make an HTTP request to get the download URL from Laravel
+    const response = await axiosClient.get(`/products/category/csv/${chosenCategory.value}`, { responseType: 'blob' });
+    
+    // Check if the request was successful
+    if (response.status === 200) {
+      // Create a Blob from the response data
+      const blob = new Blob([response.data], { type: 'application/csv' });
+
+      // Create a URL for the Blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Create an anchor element for downloading
+      const a = document.createElement('a');
+      a.href = url;
+      const filteredCategoryNames = categories.value.filter(category => category.id == chosenCategory.value).map(category => category.name);
+      a.download = `Products-Category-${filteredCategoryNames[0]}.csv`; // Set the desired file name
+
+      // Trigger a click event on the anchor element to start the download
+      a.click();
+
+      // Clean up by revoking the Object URL to release resources
+      window.URL.revokeObjectURL(url);
+    } else {
+      console.error('Error downloading the CSV file:', response);
+    }
+  } catch (error) {
+    console.error('Error downloading the CSV file:', error);
+  }
 }
 
 </script>

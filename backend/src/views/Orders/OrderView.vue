@@ -172,6 +172,7 @@ function onStatusChange() {
           .then(({data}) => {
             order.value = data
             this_order.value = data.status
+            history.back();
           })
           // order.value.status = this_order.value
         }

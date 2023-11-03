@@ -51,7 +51,19 @@ export default defineComponent({
   setup(props) {
     const chartOptions = {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      // Customize the tooltip
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              // Access the price data from the dataset
+              const price = props.data.datasets[0].price[context.dataIndex];
+              return `${props.data.labels[context.dataIndex]}: ${context.formattedValue}, Total: ₱${price}`;
+            }
+          }
+        }
+      }
     }
 
     return () =>

@@ -98,14 +98,17 @@ class DashboardController extends Controller
         ->select([
             'd.name',
             DB::raw('count(orders.id) as per_order'),
-            DB::raw('sum(a.quantity) as count') // Add this line
+            DB::raw('sum(a.quantity) as count'),
+            DB::raw('sum(a.quantity * p.price) as price_per_category') // Add this line
         ])
         ->join('users', 'created_by', '=', 'users.id')
         ->join('order_items AS a', 'orders.id', '=', 'a.order_id')
         ->join('product_categories AS c', 'a.product_id', '=', 'c.product_id')
         ->join('categories AS d', 'c.category_id', '=', 'd.id')
+        ->join('products AS p', 'a.product_id', '=', 'p.id') // Join the products table
         ->where('status', OrderStatus::Paid->value)
         ->groupBy('d.name');
+        
     
         // if ($fromDate) {
         //     $query->where('orders.created_at', '>', $fromDate);

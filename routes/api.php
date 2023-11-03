@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::apiResource('customers', CustomerController::class);
     Route::apiResource('categories', CategoryController::class)->except('show');
     Route::get('/categories/tree', [CategoryController::class, 'getAsTree']);
+    Route::get('/categories/categoryWithAll', [CategoryController::class, 'categoryWithAll']);
     Route::get('/countries', [CustomerController::class, 'countries']);
     Route::get('orders', [OrderController::class, 'index']);
     Route::get('orders/statuses', [OrderController::class, 'getStatuses']);
@@ -36,7 +37,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('orders/{order}', [OrderController::class, 'view']);
     Route::get('/getItemCount', [ProductController::class, 'getItemCount']);
     Route::post('/dashboard/csv', [DashboardController::class, 'downloadCsv']);
-
+    Route::get('/products/category/csv/{id}', [ProductController::class, 'downloadProductCategoryCsv']);
 
     // Dashboard Routes
     Route::get('/dashboard/customers-count', [DashboardController::class, 'activeCustomers']);

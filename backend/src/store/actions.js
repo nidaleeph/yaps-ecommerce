@@ -57,7 +57,7 @@ export function getOrder({commit}, id) {
   return axiosClient.get(`/orders/${id}`)
 }
 
-export function getProducts({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction} = {}) {
+export function getProducts({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction, category} = {}) {
   commit('setProducts', [true])
   url = url || '/products'
   const params = {
@@ -66,7 +66,7 @@ export function getProducts({commit, state}, {url = null, search = '', per_page,
   return axiosClient.get(url, {
     params: {
       ...params,
-      search, per_page, sort_field, sort_direction
+      search, per_page, sort_field, sort_direction, category
     }
   })
     .then((response) => {

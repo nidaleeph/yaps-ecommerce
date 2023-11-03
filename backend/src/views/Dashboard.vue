@@ -210,13 +210,20 @@ function updateDashboard() {
             '#8A2BE2', '#FFA500', '#228B22', '#8B4513',
             '#2E8B57', '#9400D3', '#FF1493', '#00CED1',
         ],
-        data: []
+        data: [],
+        price: [], // Store prices
       }]
     }
+    // Create an array to store the price information
+      const prices = [];
+
     type.forEach(c => {
       chartData.labels.push(c.name);
       chartData.datasets[0].data.push(c.count);
-    })
+      chartData.datasets[0].price.push(c.price_per_category); // Store prices
+
+      // Add tooltips with price information
+    });
     ordersByCountry.value = chartData
   })
 
@@ -251,25 +258,6 @@ function downloadFile(details) {
     // console.log(typeof details);
   }
 }
-
-// async function downloadCsv() {
-//   const date = chosenDate2.value;
-
-//   const { data } = await axiosClient.post('/dashboard/csv', date);
-
-//   // Create a hidden link for downloading the file
-//   const a = document.createElement('a');
-//   a.href = data; // Set the file URL received from the server
-//   a.download = 'test.csv'; // Set the desired file name
-
-//   // Trigger a click event to initiate the download
-//   a.style.display = 'none'; // Hide the link
-//   document.body.appendChild(a); // Add the link to the document
-//   a.click(); // Trigger the click event
-
-//   // Clean up after the download
-//   document.body.removeChild(a);
-// }
 
 async function downloadCsv() {
   const date = chosenDate2.value; // Replace with your date retrieval logic

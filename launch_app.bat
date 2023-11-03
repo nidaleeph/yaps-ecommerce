@@ -2,6 +2,9 @@
 cd /d "%~dp0"
 
 REM Run npm run dev in the background
+start "git pull" /min git pull
+
+REM Run npm run dev in the background
 start "npm run dev" /min npm run dev
 
 REM Change to the "backend" folder and run npm run dev in the background

@@ -14,6 +14,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use App\Helpers\GlobalHelpers;
+use App\Models\Category;
+
 
 class ProductController extends Controller
 {
@@ -28,20 +31,24 @@ class ProductController extends Controller
         $search = request('search', '');
         $sortField = request('sort_field', 'created_at');
         $sortDirection = request('sort_direction', 'desc');
+        $category = request('category', 0); // Change this to the category ID you want to filter by
         
-        $query = Product::query()
-            ->where(function ($query) use ($search) {
-                $query->where('title', 'like', "%{$search}%")
-                    ->orWhere('product_code', 'like', "%{$search}%")
-                    ->orWhere('price', 'like', "%{$search}%")
-                    ->orWhere('quantity', 'like', "%{$search}%");
-            })
-            ->orWhereHas('categories', function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->with('categories') // Eager load the categories relationship
-            ->orderBy($sortField, $sortDirection)
-            ->paginate($perPage);
+        $query = Product::query();
+        if( $category != 0){
+            $query = $query->orWhereHas('categories', function ($query) use ($category) {
+                $query->where('categories.id', $category);
+            });
+        }
+        $query = $query->where(function ($query) use ($search) {
+            $query->where('products.quantity', 'like', '%' . $search . '%')
+                ->orWhere('products.title', 'like', '%' . $search . '%')
+                ->orWhere('products.product_code', 'like', '%' . $search . '%')
+                ->orWhere('products.price', 'like', '%' . $search . '%');
+        })
+            
+        ->with('categories')
+        ->orderBy($sortField, $sortDirection)
+        ->paginate($perPage);
 
         return ProductListResource::collection($query);
     }
@@ -202,4 +209,63 @@ class ProductController extends Controller
     {
         return Product::withTrashed()->count();
     }
+
+    public function downloadProductCategoryCsv(Request $request, $id, Product $product) {
+
+        $query = Product::select([
+            'products.product_code',
+            'products.title',
+            'products.price',
+            'products.quantity',
+            'categories.name as category_name',
+        ])
+        ->join('product_categories', 'products.id', '=', 'product_categories.product_id')
+        ->join('categories', 'product_categories.category_id', '=', 'categories.id')
+        ->where('products.quantity', '>', 0)
+        ->orderBy('categories.id', 'ASC')
+        ->when($id != 0, function ($query) use ($id) {
+            $query->where('categories.id', $id);
+        })
+        ->orderBy('products.id', 'ASC') // Add this line to order by products.id
+        ->get();
+
+
+        $data = [];
+
+        foreach ($query as $item) {
+            array_push($data, [
+                $item->product_code,
+                $item->title,
+                $item->price,
+                $item->quantity,
+                $item->category_name,
+            ]);
+    
+        }
+
+        $headers = [[
+            'Product Code',
+            'Product Name',
+            'Price',
+            'Quantity',
+            'Category',
+        ]];
+
+        $path = GlobalHelpers::generateCsv([
+            'header' => $headers,
+            'data' => $data,
+            'filename' => 'Products-category='.$id. '.csv',
+            'path' => '/exports/products/csv/',
+        ]);
+
+        $fileName = 'Products-category='.$id . '.csv';
+
+        $path = storage_path('app/exports/products/csv/'.$fileName);
+
+        $response = response()->download($path, $fileName);
+
+        return $response;
+       
+    }
+    
 }

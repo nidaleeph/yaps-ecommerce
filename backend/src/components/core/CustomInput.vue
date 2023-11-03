@@ -16,6 +16,15 @@
           <option v-for="option of selectOptions" :value="option.key">{{ option.text }}</option>
         </select>
       </template>
+      <template v-if="type === 'select-category'">
+        <select :name="name"
+                :required="required"
+                :value="props.modelValue"
+                :class="inputClasses"
+                @change="onChange($event.target.value)">
+          <option v-for="option of selectOptions" :value="option.id">{{ option.name }}</option>
+        </select>
+      </template>
       <template v-else-if="type === 'date-range'">
         <div>
           <input

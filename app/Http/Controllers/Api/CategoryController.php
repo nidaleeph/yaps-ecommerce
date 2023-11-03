@@ -72,4 +72,20 @@ class CategoryController extends Controller
 
         return response()->noContent();
     }
+    
+    public function categoryWithAll(Category $category)
+    {
+        $categories = Category::select('id', 'name')
+            ->get();
+
+        // Add the 'all' and 'All Category' row with both 'id' and 'name'
+        $allCategory = new Category();
+        $allCategory->id = 0;
+        $allCategory->name = 'All Category';
+
+        $categories->prepend($allCategory);
+
+        return $categories;
+    }
+
 }
