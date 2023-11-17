@@ -11,7 +11,7 @@
       <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" @click="downloadCsv">Download</button>
     </div>
   </div>
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+  <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
     <!--    Active Customers-->
     <div class="animate-fade-in-down bg-white py-6 px-5 rounded-lg shadow flex flex-col items-center justify-center">
       <label class="text-lg font-semibold block mb-2">Active Customers</label>
@@ -41,6 +41,13 @@
       <Spinner v-else text="" class=""/>
     </div>
     <!--/    Paid Orders -->
+    <div class="animate-fade-in-down bg-white py-6 px-5 rounded-lg shadow flex flex-col items-center justify-center">
+      <label class="text-lg font-semibold block mb-2">Active Event</label>
+      <template v-if="!loading.customersCount">
+        <span class="text-3xl font-semibold text-center">{{ activeEvent.name }}<br><span style="color: red;">{{ activeEvent.percentage }}% OFF</span></span>
+      </template>
+      <Spinner v-else text="" class=""/>
+    </div>
     <!--    Total Income -->
     <div class="animate-fade-in-down bg-white py-6 px-5 rounded-lg shadow flex flex-col items-center"
          style="animation-delay: 0.3s">
@@ -82,8 +89,8 @@
     </div>
     <div class="bg-white py-6 px-5 rounded-lg shadow flex flex-col items-center justify-center">
       <label class="text-lg font-semibold block mb-2">Orders by Category</label>
-      <template v-if="!loading.ordersByCountry">
-        <DoughnutChart :width="400" :height="400" :data="ordersByCountry"/>
+      <template v-if="!loading.ordersByCategory">
+        <DoughnutChart :width="400" :height="400" :data="ordersByCategory"/>
       </template>
       <Spinner v-else text="" class=""/>
     </div>
@@ -115,14 +122,15 @@ import {computed, onMounted, ref} from "vue";
 import Spinner from "../components/core/Spinner.vue";
 import CustomInput from "../components/core/CustomInput.vue";
 import {useStore} from "vuex";
+import moment from 'moment';
+
 
 const store = useStore();
 const dateOptions = computed(() => store.state.dateOptions);
 const chosenDate = ref('all')
-const date = new Date();
-const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-01`;
-const startDate = new Date(formattedDate).toISOString().split('T')[0];
-const chosenDate2 = ref({ startDate: startDate, endDate: new Date().toISOString().split('T')[0] });
+const philippinesTimeZone = 'Asia/Manila';
+const startDate = moment(new Date().toLocaleString('en-US', { timeZone: philippinesTimeZone })).format('YYYY-MM-01');
+const chosenDate2 = ref({ startDate: startDate, endDate: moment(new Date().toLocaleString('en-US', { timeZone: philippinesTimeZone })).format('YYYY-MM-DD') });
 
 const loading = ref({
   customersCount: true,
@@ -130,16 +138,18 @@ const loading = ref({
   paidOrders: true,
   totalIncome: true,
   allTimeTotalIncome: false,
-  ordersByCountry: true,
+  ordersByCategory: true,
   latestCustomers: true,
-  latestOrders: true
+  latestOrders: true,
+  activeEvent: true
 })
 const customersCount = ref(0);
+const activeEvent = ref({});
 const productsCount = ref(0);
 const paidOrders = ref(0);
 const totalIncome = ref(0);
 const allTimeTotalIncome = ref(0);
-const ordersByCountry = ref([]);
+const ordersByCategory = ref([]);
 const latestCustomers = ref([]);
 const latestOrders = ref([]);
 const allPrice = ref(0);
@@ -153,14 +163,20 @@ function updateDashboard() {
     productsCount: true,
     paidOrders: true,
     totalIncome: true,
-    ordersByCountry: true,
+    ordersByCategory: true,
     latestCustomers: true,
     latestOrders: true,
-    allPrice: true
+    allPrice: true,
+    activeEvent: true
   }
   axiosClient.get(`/dashboard/customers-count`, {params: {d,date}}).then(({data}) => {
     customersCount.value = data
     loading.value.customersCount = false;
+  })
+
+  axiosClient.get(`/dashboard/get-activeEvent`, {params: {d,date}}).then(({data}) => {
+    activeEvent.value = data
+    loading.value.activeEvent = false;
   })
 
   axiosClient.post(`/dashboard/all-items-price`).then(({data}) => {
@@ -198,8 +214,8 @@ function updateDashboard() {
       .format(data);
     loading.value.allTimeTotalIncome = false;
   })
-  axiosClient.get(`/dashboard/orders-by-country`, {params: {d,date}}).then(({data: type}) => {
-    loading.value.ordersByCountry = false;
+  axiosClient.get(`/dashboard/orders-by-category`, {params: {d,date}}).then(({data: type}) => {
+    loading.value.ordersByCategory = false;
     const chartData = {
       labels: [],
       datasets: [{
@@ -224,7 +240,7 @@ function updateDashboard() {
 
       // Add tooltips with price information
     });
-    ordersByCountry.value = chartData
+    ordersByCategory.value = chartData
   })
 
   axiosClient.get(`/dashboard/latest-customers`, {params: {d,date}}).then(({data: customers}) => {

@@ -13,6 +13,8 @@
                         'price' => $product->price,
                         'quantity' => $cartItems[$product->id]['quantity'],
                         'inStock' => $product->quantity,
+                        'discount' => $activeEvent,
+                        'discountedPrice' =>$activeEvent ? ($product->price - ($product->price * ($activeEvent->percentage/100))) : '',
                         'href' => route('product.view', $product->slug),
                         'removeUrl' => route('cart.remove', $product),
                         'updateQuantityUrl' => route('cart.update-quantity', $product)
@@ -21,6 +23,9 @@
             }},
             get cartTotal() {
                 return this.cartItems.reduce((accum, next) => accum + next.price * next.quantity, 0).toFixed(2)
+            },
+            get cartTotalDiscount(){
+                return this.cartItems.reduce((accum, next) => accum + next.discountedPrice * next.quantity, 0).toFixed(2)
             },
         }" class="bg-white p-4 rounded-lg shadow">
             <!-- Product Items -->
@@ -36,12 +41,22 @@
                                     <img :src="product.image" class="object-cover" alt=""/>
                                 </a>
                                 <div class="flex flex-col justify-between flex-1">
-                                    <div class="flex justify-between mb-3">
-                                        <h3 x-text="product.title"></h3>
-                                        <span class="text-lg font-semibold">
-                                            ₱<span x-text="product.price"></span>
-                                        </span>
+                                <div class="flex justify-between mb-3">
+                                    <h3 x-text="product.title"></h3>
+                                    <div class="text-lg font-semibold">
+                                        <span class="@if($activeEvent) line-through @endif">₱<span x-text="product.price"></span></span>
+                                        @if($activeEvent)
+                                            <span >→ <span class="error-message" 
+                                            x-text="
+                                            new Intl.NumberFormat('en-PH', {
+                                                style: 'currency',
+                                                currency: 'PHP',
+                                                minimumFractionDigits: 2
+                                            }).format((product.price - (product.price * (product.discount.percentage/100))))">
+                                            </span></span>
+                                        @endif
                                     </div>
+                                </div>
                                     <div class="flex justify-between items-center">
                                         <div class="flex items-center">
                                             Qty:
@@ -94,7 +109,11 @@
         </div>
         <div class="flex justify-between">
             <span class="font-semibold">Subtotal</span>
-            <span id="cartTotal" class="text-xl" x-text="`₱${cartTotal}`"></span>
+            @if($activeEvent)
+                <span id="cartTotal" class="text-xl" x-text="`₱${cartTotalDiscount}`"></span>
+            @else
+                <span id="cartTotal" class="text-xl" x-text="`₱${cartTotal}`"></span>
+            @endif
         </div>
         <p class="text-gray-500 mb-6">
             Shipping and taxes calculated at checkout.

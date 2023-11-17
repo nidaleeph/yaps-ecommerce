@@ -106,6 +106,8 @@
 
 import {computed, ref} from "vue";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import moment from 'moment';
+
 
 const editor = ClassicEditor;
 
@@ -168,11 +170,11 @@ function onChange(value) {
   emit('update:modelValue', value)
   emit('change', value)
 }
+const philippinesTimeZone = 'Asia/Manila';
+const startDate = ref(moment(new Date().toLocaleString('en-US', { timeZone: philippinesTimeZone })).format('YYYY-MM-01'));
+const endDate = ref(moment(new Date().toLocaleString('en-US', { timeZone: philippinesTimeZone })).format('YYYY-MM-DD'));
 
-const date = new Date();
-const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-01`;
-const startDate = ref(new Date(formattedDate).toISOString().split('T')[0]);
-const endDate = ref(new Date().toISOString().split('T')[0]); // Set to the current date
+// const endDate = ref(new Date().toISOString().split('T')[0]); // Set to the current date
 
 function onStartDateChange(event) {
   startDate.value = event.target.value;

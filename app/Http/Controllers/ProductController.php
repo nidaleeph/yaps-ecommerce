@@ -6,6 +6,9 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Events; // 
+
 
 class ProductController extends Controller
 {
@@ -35,7 +38,8 @@ class ProductController extends Controller
 
     public function view(Product $product)
     {
-        return view('product.view', ['product' => $product]);
+        $existingActiveEvent = Events::where('active', 1)->first();
+        return view('product.view', ['product' => $product, 'activeEvent' => $existingActiveEvent]);
     }
 
     private function renderProducts(Builder $query)
@@ -63,8 +67,11 @@ class ProductController extends Controller
 
             ->paginate(10);
 
+        $existingActiveEvent = Events::where('active', 1)->first();
+
         return view('product.index', [
-            'products' => $products
+            'products' => $products,
+            'activeEvent' => $existingActiveEvent
         ]);
 
     }

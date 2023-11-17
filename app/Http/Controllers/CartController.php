@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\Events;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cookie;
@@ -14,12 +15,16 @@ class CartController extends Controller
     public function index()
     {
         [$products, $cartItems] = Cart::getProductsAndCartItems();
+        $activeEvent = Events::where('active', 1)->first();
         $total = 0;
         foreach ($products as $product) {
-            $total += $product->price * $cartItems[$product->id]['quantity'];
+            if($activeEvent){
+                $total += ($product->price -($product->price * ($activeEvent->percentage/100))) * $cartItems[$product->id]['quantity'];
+            }else{
+                $total += $product->price * $cartItems[$product->id]['quantity'];
+            }   
         }
-
-        return view('cart.index', compact('cartItems', 'products', 'total'));
+        return view('cart.index', compact('cartItems', 'products', 'total', 'activeEvent'));
     }
 
     public function add(Request $request, Product $product)

@@ -45,4 +45,9 @@ class Product extends Model
     {
         return $this->belongsToMany(Category::class, 'product_categories');
     }
+
+    public function event()
+    {
+        return $this->belongsTo(Events::class);
+    }
 }

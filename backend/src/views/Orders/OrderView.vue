@@ -99,8 +99,11 @@
             </div>
             <div class="flex justify-between items-center">
               <div class="flex items-center">Qty: {{ item.quantity }}</div>
-              <span class="text-lg font-semibold"> {{ $filters.currencyPHP(item.unit_price) }} </span>
-            </div>
+              <div>
+                <span class="text-lg font-semibold" :class="item.event ? 'line-through' :''"> {{ $filters.currencyPHP( item.unit_price) }} </span>
+                <span v-if="item.event" class="text-lg font-semibold"> → <span style="color: red;">{{ $filters.currencyPHP(item.unit_price - (item.unit_price * (item.event.percentage/100)))}} </span></span>
+              </div>
+              </div>
           </div>
         </div>
         <!--/ Order Item -->

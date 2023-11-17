@@ -62,5 +62,9 @@ export default {
   categories: {
     loading: false,
     data: [],
+  },
+  events: {
+    loading: false,
+    data: [],
   }
 }

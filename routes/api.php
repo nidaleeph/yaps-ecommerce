@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\EventsController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\OrderController;
@@ -28,6 +29,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('customers', CustomerController::class);
     Route::apiResource('categories', CategoryController::class)->except('show');
+    Route::apiResource('events', EventsController::class)->except('show');
     Route::get('/categories/tree', [CategoryController::class, 'getAsTree']);
     Route::get('/categories/categoryWithAll', [CategoryController::class, 'categoryWithAll']);
     Route::get('/countries', [CustomerController::class, 'countries']);
@@ -45,11 +47,12 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/dashboard/orders-count', [DashboardController::class, 'paidOrders']);
     Route::get('/dashboard/income-amount', [DashboardController::class, 'totalIncome']);
     Route::get('/dashboard/alltime-income-amount', [DashboardController::class, 'allTimeTotalIncome']);
-    Route::get('/dashboard/orders-by-country', [DashboardController::class, 'ordersByCountry']);
+    Route::get('/dashboard/orders-by-category', [DashboardController::class, 'ordersByCategory']);
     Route::get('/dashboard/latest-customers', [DashboardController::class, 'latestCustomers']);
     Route::get('/dashboard/latest-orders', [DashboardController::class, 'latestOrders']);
     Route::post('/dashboard/all-items-price', [DashboardController::class, 'allItemPrice']);
-
+    Route::get('/dashboard/get-activeEvent', [DashboardController::class, 'getActiveEvent']);
+    
     // Report routes
     Route::get('/report/orders', [ReportController::class, 'orders']);
     Route::get('/report/customers', [ReportController::class, 'customers']);

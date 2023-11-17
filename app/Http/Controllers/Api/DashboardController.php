@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Dashboard\OrderResource;
 use App\Models\Customer;
 use App\Models\User;
+use App\Models\Events;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderItem;
@@ -78,7 +79,7 @@ class DashboardController extends Controller
         return round($query->sum('total_price')) + $productSum;
     }
 
-    public function ordersByCountry()
+    public function ordersByCategory()
     {
         $fromDate = $this->getFromDate();
 
@@ -95,19 +96,21 @@ class DashboardController extends Controller
         //     ;
 
         $query = Order::query()
-        ->select([
-            'd.name',
-            DB::raw('count(orders.id) as per_order'),
-            DB::raw('sum(a.quantity) as count'),
-            DB::raw('sum(a.quantity * p.price) as price_per_category') // Add this line
-        ])
-        ->join('users', 'created_by', '=', 'users.id')
-        ->join('order_items AS a', 'orders.id', '=', 'a.order_id')
-        ->join('product_categories AS c', 'a.product_id', '=', 'c.product_id')
-        ->join('categories AS d', 'c.category_id', '=', 'd.id')
-        ->join('products AS p', 'a.product_id', '=', 'p.id') // Join the products table
-        ->where('status', OrderStatus::Paid->value)
-        ->groupBy('d.name');
+    ->select([
+        'd.name',
+        DB::raw('count(orders.id) as per_order'),
+        DB::raw('sum(a.quantity) as count'),
+        DB::raw('ROUND(SUM(CASE WHEN events.id IS NOT NULL THEN ((p.price - (p.price * (events.percentage/100))) * a.quantity) ELSE (p.price * a.quantity) END), 2) as price_per_category'),
+    ])
+    ->join('users', 'created_by', '=', 'users.id')
+    ->join('order_items AS a', 'orders.id', '=', 'a.order_id')
+    ->join('product_categories AS c', 'a.product_id', '=', 'c.product_id')
+    ->join('categories AS d', 'c.category_id', '=', 'd.id')
+    ->join('products AS p', 'a.product_id', '=', 'p.id') // Join the products table
+    ->leftJoin('events', 'a.eventId', '=', 'events.id') // Use leftJoin instead of join for 'events'
+    ->where('status', OrderStatus::Paid->value)
+    ->groupBy('d.name');
+
         
     
         // if ($fromDate) {
@@ -160,8 +163,10 @@ class DashboardController extends Controller
             'a.title as productName',
             'a.price as productPrice',
             'b.quantity as totalQuantity',
+            \DB::raw('COALESCE(events.name, null) as discountName'),
+            \DB::raw('COALESCE(events.percentage, null) as discountPercentage'),
             'orders.id as orderId',
-            \DB::raw('a.price * b.quantity as totalPrice'),
+            \DB::raw('CASE WHEN events.percentage IS NOT NULL THEN (a.price - (a.price * (events.percentage/100))) * b.quantity ELSE a.price * b.quantity END as totalPrice'),
             \DB::raw("DATE_FORMAT(orders.updated_at, '%M %e, %Y') as date")
         ])
             ->join('order_items AS b', 'orders.id', '=', 'b.order_id')
@@ -169,8 +174,11 @@ class DashboardController extends Controller
             ->join('product_categories AS c', 'a.id', '=', 'c.product_id')
             ->join('categories', 'c.category_id', '=', 'categories.id')
             ->join('users', 'orders.created_by', '=', 'users.id')
+            ->leftJoin('events', 'b.eventId', '=', 'events.id') // Use leftJoin instead of join for 'events'
             ->where('orders.status', OrderStatus::Paid->value)
-            ->orderBy('orders.updated_at','ASC');            
+            ->orderBy('orders.updated_at', 'ASC');
+        
+                 
         
         // Execute the query and retrieve the results
 
@@ -199,12 +207,16 @@ class DashboardController extends Controller
                 $item->productPrice,
                 $item->category,
                 $item->totalQuantity,
+                $item->discountName ? $item->discountName: '',
+                $item->discountPercentage ?  $item->discountPercentage.'%' : '',
                 $item->totalPrice,
             ]);
     
             $totalPriceSum += $item->totalPrice; // Calculate the sum of totalPrice
         }
         array_push($data,[
+           "",
+           "",
            "",
            "",
            "",
@@ -225,6 +237,8 @@ class DashboardController extends Controller
             'Product Price',
             'Category',
             'Quantity',
+            'Discount Event',
+            'Discount Percentage',
             'Total Price',
         ]];
 
@@ -250,5 +264,10 @@ class DashboardController extends Controller
         return Product::where('published', true)->get()->sum(function ($product) {
             return $product->price * $product->quantity;
         });
+    }
+
+    public function getActiveEvent(){
+        $existingActiveEvent = Events::where('active', 1)->first();
+        return $existingActiveEvent;
     }
 }

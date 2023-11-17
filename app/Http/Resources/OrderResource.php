@@ -30,6 +30,11 @@ class OrderResource extends JsonResource
                 'id' => $item->id,
                 'unit_price' => $item->unit_price,
                 'quantity' => $item->quantity,
+                'event' => $item->events ? [
+                    'name' => $item->events->name,
+                    'slug' => $item->events->slug,
+                    'percentage' => $item->events->percentage,
+                ] : null,
                 'product' => [
                     'id' => $item->product->id,
                     'slug' => $item->product->slug,

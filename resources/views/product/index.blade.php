@@ -1,7 +1,6 @@
 <?php
 /** @var \Illuminate\Database\Eloquent\Collection $products */
 $categoryList = \App\Models\Category::getActiveAsTree();
-
 ?>
 
 <x-app-layout>
@@ -69,14 +68,19 @@ $categoryList = \App\Models\Category::getActiveAsTree();
                     ]) }})"
                     class="border border-1 border-gray-200 rounded-md hover:border-purple-600 transition-colors bg-white"
                 >
-                    <a href="{{ route('product.view', $product->slug) }}"
-                       class="aspect-w-3 aspect-h-2 block overflow-hidden">
-                        <img
-                            :src="product.image"
-                            alt=""
-                            class="object-cover rounded-lg hover:scale-105 hover:rotate-1 transition-transform"
-                        />
-                    </a>
+                <a href="{{ route('product.view', $product->slug) }}" class="aspect-w-3 aspect-h-2 block overflow-hidden relative">
+                    <img
+                        :src="product.image"
+                        alt=""
+                        class="object-cover rounded-lg hover:scale-105 hover:rotate-1 transition-transform"
+                    />
+                    @if($activeEvent)
+                        <div class="absolute bottom-0 left-0 right-0 text-white p-4" style="background: linear-gradient(to top left, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));">
+                            <p class="font-bold text-lg mb-2 error-message">{{$activeEvent->name}}</p>
+                            <p class="font-bold text-lg mb-2 error-message">-{{$activeEvent->percentage}}%</p>
+                        </div>
+                    @endif
+                </a>
                     <div class="p-4">
                         <h3 class="text-lg font-bold">{{$product->title}}</h3>
                         <p>
@@ -84,7 +88,12 @@ $categoryList = \App\Models\Category::getActiveAsTree();
                             <span>{{$product->product_code}}</span>
                             <span class="font-bold" style="float: right; margin-right: 50px;">Stock: <span class="error-message">{{$product->quantity}}</span></span>
                         </p>
-                        <span class="font-bold">₱{{$product->price}}</span>
+                        <p>
+                        <span class="font-bold @if($activeEvent) line-through @endif">₱{{$product->price}}</span>
+                        @if($activeEvent)
+                            <span class="font-bold">→ <span class="error-message">₱{{number_format($product->price - ($product->price) * ($activeEvent->percentage / 100),2)}}</span></span>                
+                        @endif
+                        </p>    
                     </div>
                     <div class="flex justify-between py-3 px-4">
                         <button class="btn-primary" @click="addToCart()">

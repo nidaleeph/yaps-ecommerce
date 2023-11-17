@@ -46,8 +46,7 @@ const percent = ref(0)
 const toast = computed(() => store.state.toast)
 watch(store.state.toast, (newToast) => {
   if (newToast.show) {
-    console.log('toast',newToast)
-
+    // console.log('toast',newToast)
     if (interval) {
       clearInterval(interval);
       interval = null;

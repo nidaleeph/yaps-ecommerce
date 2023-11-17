@@ -17,6 +17,7 @@ import OrdersReport from "../views/Reports/OrdersReport.vue";
 import CustomersReport from "../views/Reports/CustomersReport.vue";
 import ProductForm from "../views/Products/ProductForm.vue";
 import Categories from "../views/Categories/Categories.vue";
+import Events from "../views/Events/Events.vue";
 
 const routes = [
   {
@@ -104,6 +105,11 @@ const routes = [
             component: CustomersReport
           }
         ]
+      },
+      {
+        path: 'events',
+        name: 'app.events',
+        component: Events
       },
     ]
   },

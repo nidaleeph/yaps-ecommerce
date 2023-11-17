@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\User;
+use App\Models\Events;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -141,6 +142,7 @@ class CheckoutController extends Controller
         $user = null;
         $customer = null;
         $user = User::where('email', substr($request->firstname, 0, 3).$request->lastname."@example.com")->first();
+        $existingActiveEvent = Events::where('active', 1)->first();
         // return ($user);
         if($user === null){
             $user = new User();
@@ -194,7 +196,11 @@ class CheckoutController extends Controller
 
         foreach ($products as $product) {
             $quantity = $cartItems[$product->id]['quantity'];
-            $totalPrice += $product->price * $quantity;
+            if($existingActiveEvent){
+                $totalPrice += ($product->price - ($product->price * ($existingActiveEvent->percentage)/100)) * $quantity;
+            }else{
+                $totalPrice += $product->price * $quantity;
+            }
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'php',
@@ -241,8 +247,13 @@ class CheckoutController extends Controller
             $order = Order::create($orderData);
 
             // Create Order Items
+            
+
             foreach ($orderItems as $orderItem) {
                 $orderItem['order_id'] = $order->id;
+                if($existingActiveEvent){
+                    $orderItem['eventId'] = $existingActiveEvent->id;
+                }
                 OrderItem::create($orderItem);
             }
 

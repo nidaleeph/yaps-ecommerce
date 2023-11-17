@@ -117,3 +117,21 @@ export function setCategories(state, [loading, data = null]) {
 
   state.categories.loading = loading;
 }
+
+export function setEvents(state, [loading, data = null]) {
+
+  if (data) {
+    state.events = {
+      ...state.events,
+      data: data.data,
+      links: data.meta?.links,
+      page: data.meta.current_page,
+      limit: data.meta.per_page,
+      from: data.meta.from,
+      to: data.meta.to,
+      total: data.meta.total,
+    }
+  }
+
+  state.events.loading = loading;
+}

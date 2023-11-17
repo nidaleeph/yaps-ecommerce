@@ -215,6 +215,26 @@ export function getCategories({commit, state}, {url = null, search = '', per_pag
     
 }
 
+export function getEvents({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction} = {}) {
+  commit('setEvents', [true])
+  url = url || '/events'
+  const params = {
+    per_page: state.events.limit,
+  }
+  return axiosClient.get(url, {
+    params: {
+      ...params,
+      search, per_page, sort_field, sort_direction
+    }
+  })
+    .then((response) => {
+      commit('setEvents', [false, response.data])
+    })
+    .catch(() => {
+      commit('setEvents', [false])
+    })
+}
+
 export function createCategory({commit}, category) {
   return axiosClient.post('/categories', category)
 }
@@ -223,6 +243,19 @@ export function updateCategory({commit}, category) {
   return axiosClient.put(`/categories/${category.id}`, category)
 }
 
+
 export function deleteCategory({commit}, category) {
   return axiosClient.delete(`/categories/${category.id}`)
+}
+
+export function createEvent({commit}, event) {
+  return axiosClient.post('/events', event)
+}
+
+export function updateEvent({commit}, event) {
+  return axiosClient.put(`/events/${event.id}`, event)
+}
+
+export function deleteEvent({commit}, event) {
+  return axiosClient.delete(`/events/${event.id}`)
 }
