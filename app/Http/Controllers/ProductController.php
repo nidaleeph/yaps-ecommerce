@@ -7,7 +7,7 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Events; // 
+use App\Models\Events; //
 
 
 class ProductController extends Controller

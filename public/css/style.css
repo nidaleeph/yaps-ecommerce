@@ -1,0 +1,70 @@
+/* Slide-in */
+.slide-in {
+  opacity: 0;
+  transform: translateY(100px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+.slide-in.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fade-in */
+.fade-in {
+  opacity: 0;
+  transition: opacity 1s;
+}
+.fade-in.active {
+  opacity: 1;
+}
+
+/* Slide-up */
+.slide-up {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1s, transform 1s;
+}
+.slide-up.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Slide-left */
+.slide-left {
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 1s, transform 1s;
+}
+.slide-left.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Slide-right */
+.slide-right {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 1s, transform 1s;
+}
+.slide-right.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Slide-down */
+.slide-down {
+  opacity: 0;
+  transform: translateY(-50px);
+  transition: opacity 1s, transform 1s;
+}
+.slide-down.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Visible */
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 1s, transform 1s;
+}

@@ -4,6 +4,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['guestOrVerified'])->group(function () {
-    Route::get('/', [ProductController::class, 'index'])->name('home');
+    Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/category/{category:slug}', [ProductController::class, 'byCategory'])->name('byCategory');
     Route::get('/product/{product:slug}', [ProductController::class, 'view'])->name('product.view');
 
@@ -28,6 +29,10 @@ Route::middleware(['guestOrVerified'])->group(function () {
         Route::post('/add/{product:slug}', [CartController::class, 'add'])->name('add');
         Route::post('/remove/{product:slug}', [CartController::class, 'remove'])->name('remove');
         Route::post('/update-quantity/{product:slug}', [CartController::class, 'updateQuantity'])->name('update-quantity');
+    });
+
+    Route::prefix('/product')->name('product.')->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('index');
     });
 });
 
