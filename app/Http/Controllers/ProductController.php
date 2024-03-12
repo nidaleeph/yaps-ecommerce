@@ -15,8 +15,8 @@ class ProductController extends Controller
     public function index()
     {
         $query = Product::query()
-            ->orderByRaw('quantity > 0 desc')
-            ->orderBy('updated_at', 'desc');
+            ->orderByRaw('quantity > 0 desc');
+            // ->orderBy('updated_at', 'desc');
 
         return $this->renderProducts($query);
 
@@ -25,7 +25,6 @@ class ProductController extends Controller
     public function byCategory(Category $category)
     {
         $categories = Category::getAllChildrenByParent($category);
-
         $query = Product::query()
             ->select('products.*')
             ->join('product_categories AS pc', 'pc.product_id', 'products.id')
@@ -64,7 +63,6 @@ class ProductController extends Controller
                     ->orWhere('products.description', 'like', "%$search%")
                     ->orWhere('products.product_code', 'like', "%$search%");
             })
-
             ->paginate(10);
 
         $existingActiveEvent = Events::where('active', 1)->first();

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Log;
 
 class RegisteredUserController extends Controller
 {
@@ -38,14 +39,18 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'lastName' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         DB::beginTransaction();
         try {
+
             $user = User::create([
-                'name' => $request->name,
+                'name' => $request->name .' ' . $request->lastName,
+                'firstName' => $request->name,
+                'lastName' => $request->lastName,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
@@ -53,16 +58,16 @@ class RegisteredUserController extends Controller
             event(new Registered($user));
 
             $customer = new Customer();
-            $names = explode(" ", $user->name);
             $customer->user_id = $user->id;
-            $customer->first_name = $names[0];
-            $customer->last_name = $names[1] ?? '';
+            $customer->first_name = $user->firstName;
+            $customer->last_name = $user->lastName;
             $customer->save();
 
             Auth::login($user);
         } catch (\Exception $e) {
+            Log::error($e);
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Unable to register right now.');
+            return redirect()->back()->withInput()->with('error', 'Unable to register right now.' .$e);
         }
 
         DB::commit();

@@ -1,5 +1,5 @@
-import {createRouter, createWebHistory} from "vue-router";
-import AppLayout from '../components/AppLayout.vue'
+import { createRouter, createWebHistory } from "vue-router";
+import AppLayout from "../components/AppLayout.vue";
 import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
 import Products from "../views/Products/Products.vue";
@@ -17,147 +17,183 @@ import OrdersReport from "../views/Reports/OrdersReport.vue";
 import CustomersReport from "../views/Reports/CustomersReport.vue";
 import ProductForm from "../views/Products/ProductForm.vue";
 import Categories from "../views/Categories/Categories.vue";
+import CategoriesWatch from "../views/CategoriesWatch/CategoriesWatch.vue";
 import Events from "../views/Events/Events.vue";
+import Watch from "../views/DynamicPage/Watch/Watch.vue";
+import WatchForm from "../views/DynamicPage/Watch/WatchForm.vue";
+import DyanmicPage from "../views/DynamicPage/DynamicPage.vue";
 
 const routes = [
   {
-    path: '/',
-    redirect: '/app'
+    path: "/",
+    redirect: "/app",
   },
   {
-    path: '/app',
-    name: 'app',
-    redirect: '/app/dashboard',
+    path: "/app",
+    name: "app",
+    redirect: "/app/dashboard",
     component: AppLayout,
     meta: {
-      requiresAuth: true
+      requiresAuth: true,
     },
     children: [
       {
-        path: 'dashboard',
-        name: 'app.dashboard',
-        component: Dashboard
+        path: "dashboard",
+        name: "app.dashboard",
+        component: Dashboard,
       },
       {
-        path: 'products',
-        name: 'app.products',
-        component: Products
+        path: "products",
+        name: "app.products",
+        component: Products,
       },
       {
-        path: 'categories',
-        name: 'app.categories',
-        component: Categories
+        path: "categories",
+        name: "app.categories",
+        component: Categories,
       },
       {
-        path: 'products/create',
-        name: 'app.products.create',
-        component: ProductForm
+        path: "categoriesWatch",
+        name: "app.categoriesWatch",
+        component: CategoriesWatch,
       },
       {
-        path: 'products/:id',
-        name: 'app.products.edit',
+        path: "products/create",
+        name: "app.products.create",
+        component: ProductForm,
+      },
+      {
+        path: "products/:id",
+        name: "app.products.edit",
         component: ProductForm,
         props: {
-          id: (value) => /^\d+$/.test(value)
-        }
+          id: (value) => /^\d+$/.test(value),
+        },
       },
       {
-        path: 'users',
-        name: 'app.users',
-        component: Users
+        path: "users",
+        name: "app.users",
+        component: Users,
       },
       {
-        path: 'customers',
-        name: 'app.customers',
-        component: Customers
+        path: "customers",
+        name: "app.customers",
+        component: Customers,
       },
       {
-        path: 'customers/:id',
-        name: 'app.customers.view',
-        component: CustomerView
+        path: "customers/:id",
+        name: "app.customers.view",
+        component: CustomerView,
       },
       {
-        path: 'orders',
-        name: 'app.orders',
-        component: Orders
+        path: "orders",
+        name: "app.orders",
+        component: Orders,
       },
       {
-        path: 'orders/:id',
-        name: 'app.orders.view',
-        component: OrderView
+        path: "orders/:id",
+        name: "app.orders.view",
+        component: OrderView,
       },
       {
-        path: '/report',
-        name: 'reports',
+        path: "/report",
+        name: "reports",
         component: Report,
         meta: {
-          requiresAuth: true
+          requiresAuth: true,
         },
         children: [
           {
-            path: 'orders/:date?',
-            name: 'reports.orders',
-            component: OrdersReport
+            path: "orders/:date?",
+            name: "reports.orders",
+            component: OrdersReport,
           },
           {
-            path: 'customers/:date?',
-            name: 'reports.customers',
-            component: CustomersReport
-          }
-        ]
+            path: "customers/:date?",
+            name: "reports.customers",
+            component: CustomersReport,
+          },
+        ],
       },
       {
-        path: 'events',
-        name: 'app.events',
-        component: Events
+        path: "events",
+        name: "app.events",
+        component: Events,
       },
-    ]
+      {
+        path: "/dynamic-page",
+        name: "dynamicpage",
+        component: DyanmicPage,
+        meta: {
+          requiresAuth: true,
+        },
+        children: [
+          {
+            path: "watch",
+            name: "dynamicpage.watch",
+            component: Watch,
+          },
+          {
+            path: "watch/create",
+            name: "dynamicpage.watch.create",
+            component: WatchForm,
+          },
+          {
+            path: "watch/:id",
+            name: "dynamicpage.watch.edit",
+            component: WatchForm,
+            props: {
+              id: (value) => /^\d+$/.test(value),
+            },
+          },
+        ],
+      },
+    ],
   },
   {
-    path: '/login',
-    name: 'login',
+    path: "/login",
+    name: "login",
     component: Login,
     meta: {
-      requiresGuest: true
-    }
+      requiresGuest: true,
+    },
   },
   {
-    path: '/request-password',
-    name: 'requestPassword',
+    path: "/request-password",
+    name: "requestPassword",
     component: RequestPassword,
     meta: {
-      requiresGuest: true
-    }
+      requiresGuest: true,
+    },
   },
   {
-    path: '/reset-password/:token',
-    name: 'resetPassword',
+    path: "/reset-password/:token",
+    name: "resetPassword",
     component: ResetPassword,
     meta: {
-      requiresGuest: true
-    }
+      requiresGuest: true,
+    },
   },
   {
-    path: '/:pathMatch(.*)',
-    name: 'notfound',
+    path: "/:pathMatch(.*)",
+    name: "notfound",
     component: NotFound,
-  }
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-})
+  routes,
+});
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !store.state.user.token) {
-    next({name: 'login'})
+    next({ name: "login" });
   } else if (to.meta.requiresGuest && store.state.user.token) {
-    next({name: 'app.dashboard'})
+    next({ name: "app.dashboard" });
   } else {
     next();
   }
-
-})
+});
 
 export default router;

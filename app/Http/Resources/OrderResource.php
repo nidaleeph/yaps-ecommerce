@@ -50,8 +50,8 @@ class OrderResource extends JsonResource
                 'phone' => $customer->phone,
                 'shippingAddress' => [
                     'id' => $shipping ?  $shipping->id : 1,
-                    'address1' => $shipping ? $shipping->address1 : "MetroNorth Daybyday",
-                    'address2' => $shipping ? $shipping->address2 : "Jesus Ministries Inc", 
+                    'address1' => $shipping ? $shipping->address1 : "Metro North DaybyDay",
+                    'address2' => $shipping ? $shipping->address2 : "Jesus Ministries Inc",
                     'city' => $shipping ? $shipping->city : "Quezon City",
                     'state' => $shipping ? $shipping->state : "NCR",
                     'zipcode' => $shipping ? $shipping->zipcode : "N/A",
@@ -59,7 +59,7 @@ class OrderResource extends JsonResource
                 ],
                 'billingAddress' => [
                     'id' => $billing ? $billing->id : 1,
-                    'address1' => $billing ? $billing->address1 : "MetroNorth Daybyday",
+                    'address1' => $billing ? $billing->address1 : "Metro North DaybyDay",
                     'address2' => $billing ? $billing->address2 : "Jesus Ministries Inc",
                     'city' => $billing ? $billing->city : "Quezon City",
                     'state' => $billing ? $billing->state : "NCR",

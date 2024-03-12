@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Models\YoutubeFlag;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,7 +16,25 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Run the command every 30 minutes starting from 9:00 AM
+        $schedule->command('command:check-live')
+                ->everyThirtyMinutes()
+                ->withoutOverlapping()
+                ->runInBackground()  // Ensure the task doesn't overlap
+                ->when(function () {
+                    $currentHour = now()->hour;
+
+                    // Stop running after 10:00 PM
+                    if ($currentHour < 22) {
+                        return true; // Run the command
+                    } else {
+                        // Update YoutubeFlag live_flag to 0 after 10:00 PM
+                        $YoutubeFlag = YoutubeFlag::first();
+
+                        YoutubeFlag::where('channel_id', $YoutubeFlag->channel_id)->update(['live_flag' => 0]);
+                        return false; // Do not run the command
+                    }
+                });
     }
 
     /**

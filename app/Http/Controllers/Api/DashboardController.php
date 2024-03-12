@@ -111,8 +111,8 @@ class DashboardController extends Controller
     ->where('status', OrderStatus::Paid->value)
     ->groupBy('d.name');
 
-        
-    
+
+
         // if ($fromDate) {
         //     $query->where('orders.created_at', '>', $fromDate);
         // }
@@ -177,9 +177,9 @@ class DashboardController extends Controller
             ->leftJoin('events', 'b.eventId', '=', 'events.id') // Use leftJoin instead of join for 'events'
             ->where('orders.status', OrderStatus::Paid->value)
             ->orderBy('orders.updated_at', 'ASC');
-        
-                 
-        
+
+
+
         // Execute the query and retrieve the results
 
         if($request->startDate && $request->endDate){
@@ -187,10 +187,10 @@ class DashboardController extends Controller
                 ->whereDate('orders.created_at', '<=', $request->endDate);
         }
         $results = $query->get();
-        
+
         // Convert the results to a JSON response
         // return response()->json($results);
-        
+
 
         // return $orders;
         $totalPriceSum = 0;
@@ -211,7 +211,7 @@ class DashboardController extends Controller
                 $item->discountPercentage ?  $item->discountPercentage.'%' : '',
                 $item->totalPrice,
             ]);
-    
+
             $totalPriceSum += $item->totalPrice; // Calculate the sum of totalPrice
         }
         array_push($data,[

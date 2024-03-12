@@ -1,261 +1,430 @@
 import axiosClient from "../axios";
 
-export function getCurrentUser({commit}, data) {
-  return axiosClient.get('/user', data)
-    .then(({data}) => {
-      commit('setUser', data);
-      return data;
-    })
+export function getCurrentUser({ commit }, data) {
+  return axiosClient.get("/user", data).then(({ data }) => {
+    commit("setUser", data);
+    return data;
+  });
 }
 
-export function login({commit}, data) {
-  return axiosClient.post('/login', data)
-    .then(({data}) => {
-      commit('setUser', data.user);
-      commit('setToken', data.token)
-      return data;
-    })
+export function login({ commit }, data) {
+  return axiosClient.post("/login", data).then(({ data }) => {
+    commit("setUser", data.user);
+    commit("setToken", data.token);
+    return data;
+  });
 }
 
-export function logout({commit}) {
-  return axiosClient.post('/logout')
-    .then((response) => {
-      commit('setToken', null)
+export function logout({ commit }) {
+  return axiosClient.post("/logout").then((response) => {
+    commit("setToken", null);
 
-      return response;
-    })
+    return response;
+  });
 }
 
-export function getCountries({commit}) {
-  return axiosClient.get('countries')
-    .then(({data}) => {
-      commit('setCountries', data)
-    })
+export function getCountries({ commit }) {
+  return axiosClient.get("countries").then(({ data }) => {
+    commit("setCountries", data);
+  });
 }
 
-export function getOrders({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction} = {}) {
-  commit('setOrders', [true])
-  url = url || '/orders'
+export function getOrders(
+  { commit, state },
+  { url = null, search = "", per_page, sort_field, sort_direction } = {}
+) {
+  commit("setOrders", [true]);
+  url = url || "/orders";
   const params = {
     per_page: state.orders.limit,
-  }
-  return axiosClient.get(url, {
-    params: {
-      ...params,
-      search, per_page, sort_field, sort_direction
-    }
-  })
+  };
+  return axiosClient
+    .get(url, {
+      params: {
+        ...params,
+        search,
+        per_page,
+        sort_field,
+        sort_direction,
+      },
+    })
     .then((response) => {
-      commit('setOrders', [false, response.data])
+      commit("setOrders", [false, response.data]);
     })
     .catch(() => {
-      commit('setOrders', [false])
-    })
+      commit("setOrders", [false]);
+    });
 }
 
-export function getOrder({commit}, id) {
-  return axiosClient.get(`/orders/${id}`)
+export function getOrder({ commit }, id) {
+  return axiosClient.get(`/orders/${id}`);
 }
 
-export function getProducts({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction, category} = {}) {
-  commit('setProducts', [true])
-  url = url || '/products'
+export function getProducts(
+  { commit, state },
+  {
+    url = null,
+    search = "",
+    per_page,
+    sort_field,
+    sort_direction,
+    category,
+  } = {}
+) {
+  commit("setProducts", [true]);
+  url = url || "/products";
   const params = {
     per_page: state.products.limit,
-  }
-  return axiosClient.get(url, {
-    params: {
-      ...params,
-      search, per_page, sort_field, sort_direction, category
-    }
-  })
+  };
+  return axiosClient
+    .get(url, {
+      params: {
+        ...params,
+        search,
+        per_page,
+        sort_field,
+        sort_direction,
+        category,
+      },
+    })
     .then((response) => {
-      commit('setProducts', [false, response.data])
+      commit("setProducts", [false, response.data]);
     })
     .catch(() => {
-      commit('setProducts', [false])
-    })
+      commit("setProducts", [false]);
+    });
 }
 
-
-export function getProduct({commit}, id) {
-  return axiosClient.get(`/products/${id}`)
+export function getProduct({ commit }, id) {
+  return axiosClient.get(`/products/${id}`);
 }
 
-export function createProduct({commit}, product) {
-
+export function createProduct({ commit }, product) {
   if (product.images && product.images.length) {
     const form = new FormData();
-    form.append('title', product.title);
-    form.append('product_code', product.product_code);
-    product.images.forEach(im => form.append('images[]', im))
-    form.append('description', product.description || '');
-    form.append('published', product.published ? 1 : 0);
-    form.append('price', product.price);
-    form.append('quantity', product.quantity);
-    form.append('categories', product.categories);
+    form.append("title", product.title);
+    form.append("product_code", product.product_code);
+    product.images.forEach((im) => form.append("images[]", im));
+    form.append("description", product.description || "");
+    form.append("published", product.published ? 1 : 0);
+    form.append("price", product.price);
+    form.append("quantity", product.quantity);
+    form.append("categories", product.categories);
     product = form;
   }
-  return axiosClient.post('/products', product)
+  return axiosClient.post("/products", product);
 }
 
-export function updateProduct({commit}, product) {
-  const id = product.id
+export function updateProduct({ commit }, product) {
+  const id = product.id;
   if (product.images && product.images.length) {
     const form = new FormData();
-    form.append('id', product.id);
-    form.append('title', product.title);
-    form.append('product_code', product.product_code);
-    product.images.forEach(im => form.append(`images[${im.id}]`, im))
+    form.append("id", product.id);
+    form.append("title", product.title);
+    form.append("product_code", product.product_code);
+    product.images.forEach((im) => form.append(`images[${im.id}]`, im));
     if (product.deleted_images) {
-      product.deleted_images.forEach(id => form.append('deleted_images[]', id))
+      product.deleted_images.forEach((id) =>
+        form.append("deleted_images[]", id)
+      );
     }
     for (let id in product.image_positions) {
-      form.append(`image_positions[${id}]`, product.image_positions[id])
+      form.append(`image_positions[${id}]`, product.image_positions[id]);
     }
-    form.append('description', product.description || '');
-    form.append('published', product.published ? 1 : 0);
-    form.append('price', product.price);
-    form.append('quantity', product.quantity);
-    form.append('categories', product.categories);
-    form.append('_method', 'PUT');
+    form.append("description", product.description || "");
+    form.append("published", product.published ? 1 : 0);
+    form.append("price", product.price);
+    form.append("quantity", product.quantity);
+    form.append("categories", product.categories);
+    form.append("_method", "PUT");
     product = form;
   } else {
-    product._method = 'PUT'
+    product._method = "PUT";
   }
-  return axiosClient.post(`/products/${id}`, product)
+  return axiosClient.post(`/products/${id}`, product);
 }
 
-export function deleteProduct({commit}, id) {
-  return axiosClient.delete(`/products/${id}`)
+export function deleteProduct({ commit }, id) {
+  return axiosClient.delete(`/products/${id}`);
 }
 
-export function getUsers({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction} = {}) {
-  commit('setUsers', [true])
-  url = url || '/users'
+export function getWatches(
+  { commit, state },
+  {
+    url = null,
+    search = "",
+    per_page,
+    sort_field,
+    sort_direction,
+    category,
+  } = {}
+) {
+  commit("setWatches", [true]);
+  url = url || "/watches";
+  const params = {
+    per_page: state.watches.limit,
+  };
+  return axiosClient
+    .get(url, {
+      params: {
+        ...params,
+        search,
+        per_page,
+        sort_field,
+        sort_direction,
+        category,
+      },
+    })
+    .then((response) => {
+      commit("setWatches", [false, response.data]);
+    })
+    .catch(() => {
+      commit("setWatches", [false]);
+    });
+}
+
+export function getWatch({ commit }, id) {
+  return axiosClient.get(`/watches/${id}`);
+}
+
+export function createWatch({ commit }, watch) {
+  if (watch.images && watch.images.length) {
+    const form = new FormData();
+    form.append("title", watch.title);
+    form.append("subtitle", watch.subtitle);
+    form.append("url", watch.url);
+    form.append("watch_code", watch.watch_code);
+    watch.images.forEach((im) => form.append("images[]", im));
+    form.append("description", watch.description || "");
+    form.append("published", watch.published ? 1 : 0);
+    form.append("categories", watch.categories);
+    watch = form;
+  }
+  return axiosClient.post("/watches", watch);
+}
+
+export function updateWatch({ commit }, watch) {
+  const id = watch.id;
+  if (watch.images && watch.images.length) {
+    const form = new FormData();
+    form.append("id", watch.id);
+    form.append("title", watch.title);
+    form.append("subtitle", watch.subtitle);
+    form.append("url", watch.url);
+    form.append("watch_code", watch.watch_code);
+    watch.images.forEach((im) => form.append(`images[${im.id}]`, im));
+    if (watch.deleted_images) {
+      watch.deleted_images.forEach((id) => form.append("deleted_images[]", id));
+    }
+    for (let id in watch.image_positions) {
+      form.append(`image_positions[${id}]`, watch.image_positions[id]);
+    }
+    form.append("description", watch.description || "");
+    form.append("published", watch.published ? 1 : 0);
+    form.append("categories", watch.categories);
+    form.append("_method", "PUT");
+    watch = form;
+  } else {
+    watch._method = "PUT";
+  }
+  return axiosClient.post(`/watches/${id}`, watch);
+}
+
+export function deleteWatch({ commit }, id) {
+  return axiosClient.delete(`/watches/${id}`);
+}
+
+export function getUsers(
+  { commit, state },
+  { url = null, search = "", per_page, sort_field, sort_direction } = {}
+) {
+  commit("setUsers", [true]);
+  url = url || "/users";
   const params = {
     per_page: state.users.limit,
-  }
-  return axiosClient.get(url, {
-    params: {
-      ...params,
-      search, per_page, sort_field, sort_direction
-    }
-  })
+  };
+  return axiosClient
+    .get(url, {
+      params: {
+        ...params,
+        search,
+        per_page,
+        sort_field,
+        sort_direction,
+      },
+    })
     .then((response) => {
-      commit('setUsers', [false, response.data])
+      commit("setUsers", [false, response.data]);
     })
     .catch(() => {
-      commit('setUsers', [false])
-    })
+      commit("setUsers", [false]);
+    });
 }
 
-export function createUser({commit}, user) {
-  return axiosClient.post('/users', user)
+export function createUser({ commit }, user) {
+  return axiosClient.post("/users", user);
 }
 
-export function updateUser({commit}, user) {
-  return axiosClient.put(`/users/${user.id}`, user)
+export function updateUser({ commit }, user) {
+  return axiosClient.put(`/users/${user.id}`, user);
 }
 
-export function getCustomers({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction} = {}) {
-  commit('setCustomers', [true])
-  url = url || '/customers'
+export function getCustomers(
+  { commit, state },
+  { url = null, search = "", per_page, sort_field, sort_direction } = {}
+) {
+  commit("setCustomers", [true]);
+  url = url || "/customers";
   const params = {
     per_page: state.customers.limit,
-  }
-  return axiosClient.get(url, {
-    params: {
-      ...params,
-      search, per_page, sort_field, sort_direction
-    }
-  })
+  };
+  return axiosClient
+    .get(url, {
+      params: {
+        ...params,
+        search,
+        per_page,
+        sort_field,
+        sort_direction,
+      },
+    })
     .then((response) => {
-      commit('setCustomers', [false, response.data])
+      commit("setCustomers", [false, response.data]);
     })
     .catch(() => {
-      commit('setCustomers', [false])
-    })
+      commit("setCustomers", [false]);
+    });
 }
 
-export function getCustomer({commit}, id) {
-  return axiosClient.get(`/customers/${id}`)
+export function getCustomer({ commit }, id) {
+  return axiosClient.get(`/customers/${id}`);
 }
 
-export function createCustomer({commit}, customer) {
-  return axiosClient.post('/customers', customer)
+export function createCustomer({ commit }, customer) {
+  return axiosClient.post("/customers", customer);
 }
 
-export function updateCustomer({commit}, customer) {
-  return axiosClient.put(`/customers/${customer.id}`, customer)
+export function updateCustomer({ commit }, customer) {
+  return axiosClient.put(`/customers/${customer.id}`, customer);
 }
 
-export function deleteCustomer({commit}, customer) {
-  return axiosClient.delete(`/customers/${customer.id}`)
+export function deleteCustomer({ commit }, customer) {
+  return axiosClient.delete(`/customers/${customer.id}`);
 }
 
-export function getCategories({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction} = {}) {
-  commit('setCategories', [true])
-  url = url || '/categories'
+export function getCategories(
+  { commit, state },
+  { url = null, search = "", per_page, sort_field, sort_direction } = {}
+) {
+  commit("setCategories", [true]);
+  url = url || "/categories";
   const params = {
     per_page: state.categories.limit,
-  }
-  return axiosClient.get(url, {
-    params: {
-      ...params,
-      search, per_page, sort_field, sort_direction
-    }
-  })
+  };
+  return axiosClient
+    .get(url, {
+      params: {
+        ...params,
+        search,
+        per_page,
+        sort_field,
+        sort_direction,
+      },
+    })
     .then((response) => {
-      commit('setCategories', [false, response.data])
+      commit("setCategories", [false, response.data]);
     })
     .catch(() => {
-      commit('setCategories', [false])
-    })
-    
+      commit("setCategories", [false]);
+    });
 }
 
-export function getEvents({commit, state}, {url = null, search = '', per_page, sort_field, sort_direction} = {}) {
-  commit('setEvents', [true])
-  url = url || '/events'
+export function getCategoriesWatch(
+  { commit, state },
+  { url = null, search = "", per_page, sort_field, sort_direction } = {}
+) {
+  commit("setCategoriesWatch", [true]);
+  url = url || "/categoryWatch";
+  const params = {
+    per_page: state.categoriesWatch.limit,
+  };
+  return axiosClient
+    .get(url, {
+      params: {
+        ...params,
+        search,
+        per_page,
+        sort_field,
+        sort_direction,
+      },
+    })
+    .then((response) => {
+      commit("setCategoriesWatch", [false, response.data]);
+    })
+    .catch(() => {
+      commit("setCategoriesWatch", [false]);
+    });
+}
+
+export function getEvents(
+  { commit, state },
+  { url = null, search = "", per_page, sort_field, sort_direction } = {}
+) {
+  commit("setEvents", [true]);
+  url = url || "/events";
   const params = {
     per_page: state.events.limit,
-  }
-  return axiosClient.get(url, {
-    params: {
-      ...params,
-      search, per_page, sort_field, sort_direction
-    }
-  })
+  };
+  return axiosClient
+    .get(url, {
+      params: {
+        ...params,
+        search,
+        per_page,
+        sort_field,
+        sort_direction,
+      },
+    })
     .then((response) => {
-      commit('setEvents', [false, response.data])
+      commit("setEvents", [false, response.data]);
     })
     .catch(() => {
-      commit('setEvents', [false])
-    })
+      commit("setEvents", [false]);
+    });
 }
 
-export function createCategory({commit}, category) {
-  return axiosClient.post('/categories', category)
+export function createCategory({ commit }, category) {
+  return axiosClient.post("/categories", category);
 }
 
-export function updateCategory({commit}, category) {
-  return axiosClient.put(`/categories/${category.id}`, category)
+export function updateCategory({ commit }, category) {
+  return axiosClient.put(`/categories/${category.id}`, category);
 }
 
-
-export function deleteCategory({commit}, category) {
-  return axiosClient.delete(`/categories/${category.id}`)
+export function deleteCategory({ commit }, category) {
+  return axiosClient.delete(`/categories/${category.id}`);
 }
 
-export function createEvent({commit}, event) {
-  return axiosClient.post('/events', event)
+export function createCategoryWatch({ commit }, category) {
+  return axiosClient.post("/categoryWatch", category);
 }
 
-export function updateEvent({commit}, event) {
-  return axiosClient.put(`/events/${event.id}`, event)
+export function updateCategoryWatch({ commit }, category) {
+  return axiosClient.put(`/categoryWatch/${category.id}`, category);
 }
 
-export function deleteEvent({commit}, event) {
-  return axiosClient.delete(`/events/${event.id}`)
+export function deleteCategoryWatch({ commit }, category) {
+  return axiosClient.delete(`/categoryWatch/${category.id}`);
+}
+
+export function createEvent({ commit }, event) {
+  return axiosClient.post("/events", event);
+}
+
+export function updateEvent({ commit }, event) {
+  return axiosClient.put(`/events/${event.id}`, event);
+}
+
+export function deleteEvent({ commit }, event) {
+  return axiosClient.delete(`/events/${event.id}`);
 }
